@@ -2,7 +2,7 @@ import { insertTasksSchema, patchTasksSchema, selectTasksSchema } from "@/db/sch
 import { NotFoundSchema } from "@/utils/constants.js";
 import { createRoute } from "@hono/zod-openapi";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
-import { IdParamsSchema } from "stoker/openapi/schemas";
+import { createErrorSchema, IdParamsSchema } from "stoker/openapi/schemas";
 import { z } from "zod";
 
 export const list = createRoute({
@@ -24,6 +24,7 @@ export const getOne = createRoute({
   responses: {
     200: jsonContent(selectTasksSchema, "Task details"),
     404: jsonContent(NotFoundSchema, "Task not found"),
+    422: jsonContent(createErrorSchema(IdParamsSchema), "Invalid task id"),
   },
 })
 
@@ -36,6 +37,7 @@ export const create = createRoute({
   },
   responses: {
     200: jsonContent(selectTasksSchema, "Created task"),
+    422: jsonContent(createErrorSchema(insertTasksSchema), "Invalid task payload"),
   },
 })
 
@@ -50,6 +52,21 @@ export const patch = createRoute({
   responses: {
     200: jsonContent(patchTasksSchema, "Patched task"),
     404: jsonContent(NotFoundSchema, "Task not found"),
+    422: jsonContent(createErrorSchema(patchTasksSchema), "Invalid task payload"),
+  },
+})
+
+export const remove = createRoute({
+  tags: ["tasks"],
+  path: "/tasks/{id}",
+  method: "delete",
+  request: {
+    params: IdParamsSchema
+  },
+  responses: {
+    204: { description: "Task deleted" },
+    404: jsonContent(NotFoundSchema, "Task not found"),
+    422: jsonContent(createErrorSchema(IdParamsSchema), "Invalid task id"),
   },
 })
 
@@ -61,3 +78,5 @@ export type CreateRoute = typeof create;
 export type GetOneRoute = typeof getOne;
 
 export type PatchRoute = typeof patch;
+
+export type RemoveRoute = typeof remove;

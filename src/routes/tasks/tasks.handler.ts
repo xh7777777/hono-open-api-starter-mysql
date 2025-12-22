@@ -1,26 +1,32 @@
 import db from "@/db/index.js";
 import { tasks } from "@/db/schema.js";
 import { eq } from "drizzle-orm";
-import type { CreateRoute, GetOneRoute, ListRoute, PatchRoute } from "./tasks.routes.js";
+import type {
+  CreateRoute,
+  RemoveRoute,
+  GetOneRoute,
+  ListRoute,
+  PatchRoute,
+} from "./tasks.routes.js";
 import type { AppRouteHandler } from "@/lib/types.js";
 
 export const list: AppRouteHandler<ListRoute> = async (c) => {
   const taskList = await db.query.tasks.findMany();
   return c.json(taskList);
-}
+};
 
 export const getOne: AppRouteHandler<GetOneRoute> = async (c) => {
   const { id } = c.req.valid("param");
   const task = await db.query.tasks.findFirst({
     where: eq(tasks.id, id),
   });
-  
+
   if (!task) {
     return c.json({ error: "Task not found" }, 404);
   }
 
   return c.json(task, 200);
-}
+};
 
 export const create: AppRouteHandler<CreateRoute> = async (c) => {
   const task = c.req.valid("json");
@@ -40,11 +46,12 @@ export const create: AppRouteHandler<CreateRoute> = async (c) => {
   }
 
   return c.json(createdTask, 200);
-}
+};
 
 export const patch: AppRouteHandler<PatchRoute> = async (c) => {
   const { id } = c.req.valid("param");
   const updates = c.req.valid("json");
+
   const existingTask = await db.query.tasks.findFirst({
     where: eq(tasks.id, id),
   });
@@ -53,20 +60,7 @@ export const patch: AppRouteHandler<PatchRoute> = async (c) => {
     return c.json({ error: "Task not found" }, 404);
   }
 
-  if (Object.keys(updates).length === 0) {
-    return c.json(
-      {
-        title: existingTask.title,
-        description: existingTask.description,
-      },
-      200,
-    );
-  }
-
-  await db
-    .update(tasks)
-    .set(updates)
-    .where(eq(tasks.id, id));
+  await db.update(tasks).set(updates).where(eq(tasks.id, id));
 
   const payload = {
     title: updates.title ?? existingTask.title,
@@ -77,4 +71,20 @@ export const patch: AppRouteHandler<PatchRoute> = async (c) => {
   };
 
   return c.json(payload, 200);
+};
+
+export const remove: AppRouteHandler<RemoveRoute> = async (c) => {
+  const { id } = c.req.valid("param");
+
+  const existingTask = await db.query.tasks.findFirst({
+    where: eq(tasks.id, id),
+  });
+
+  if (!existingTask) {
+    return c.json({ error: "Task not found" }, 404);
+  }
+
+  await db.delete(tasks).where(eq(tasks.id, id));
+
+  return c.json({ message: "Task deleted" }, 200);
 }
