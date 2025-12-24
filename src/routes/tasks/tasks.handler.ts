@@ -60,7 +60,11 @@ export const patch: AppRouteHandler<PatchRoute> = async (c) => {
     return c.json({ error: "Task not found" }, 404);
   }
 
-  await db.update(tasks).set(updates).where(eq(tasks.id, id));
+  const hasUpdates = Object.keys(updates).length > 0;
+
+  if (hasUpdates) {
+    await db.update(tasks).set(updates).where(eq(tasks.id, id));
+  }
 
   const payload = {
     title: updates.title ?? existingTask.title,
@@ -86,5 +90,5 @@ export const remove: AppRouteHandler<RemoveRoute> = async (c) => {
 
   await db.delete(tasks).where(eq(tasks.id, id));
 
-  return c.json({ message: "Task deleted" }, 200);
+  return c.body(null, 204);
 }

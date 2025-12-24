@@ -9,6 +9,8 @@ const returningIdMock = vi.fn();
 const updateMock = vi.fn();
 const updateSetMock = vi.fn();
 const updateWhereMock = vi.fn();
+const deleteMock = vi.fn();
+const deleteWhereMock = vi.fn();
 
 vi.mock("@/middlewares/pino-logger.js", () => ({
   getPinoLogger: () => async (_c: unknown, next?: () => Promise<void>) => {
@@ -36,6 +38,10 @@ vi.mock("@/db/index.js", () => {
     },
   }));
 
+  deleteMock.mockImplementation(() => ({
+    where: (...args: unknown[]) => deleteWhereMock(...args),
+  }));
+
   return {
     default: {
       query: {
@@ -46,6 +52,7 @@ vi.mock("@/db/index.js", () => {
       },
       insert: (...args: unknown[]) => insertMock(...args),
       update: (...args: unknown[]) => updateMock(...args),
+      delete: (...args: unknown[]) => deleteMock(...args),
     },
   };
 });
@@ -67,11 +74,14 @@ beforeEach(() => {
   insertValuesMock.mockReset();
   updateSetMock.mockReset();
   updateWhereMock.mockReset();
+  deleteWhereMock.mockReset();
   insertMock.mockClear();
   updateMock.mockClear();
+  deleteMock.mockClear();
 
   returningIdMock.mockResolvedValue([{ id: 1 }]);
   updateWhereMock.mockResolvedValue(undefined);
+  deleteWhereMock.mockResolvedValue(undefined);
 });
 
 describe("tasks routes", () => {
@@ -203,6 +213,7 @@ describe("tasks routes", () => {
       description: existingTask.description,
     });
     expect(updateSetMock).not.toHaveBeenCalled();
+    expect(updateWhereMock).not.toHaveBeenCalled();
   });
 
   it("returns 404 for patch when task is missing", async () => {
@@ -217,5 +228,37 @@ describe("tasks routes", () => {
 
     expect(response.status).toBe(404);
     expect(body).toEqual({ error: "Task not found" });
+  });
+
+  it("deletes a task when it exists", async () => {
+    findFirstMock.mockResolvedValue({
+      id: 11,
+      title: "Delete me",
+      description: "Unused",
+      status: 0,
+      createdAt: "2024-01-06T00:00:00.000Z",
+      updatedAt: "2024-01-06T00:00:00.000Z",
+    });
+
+    const response = await router.request("/tasks/11", {
+      method: "DELETE",
+    });
+
+    expect(response.status).toBe(204);
+    expect(await response.text()).toBe("");
+    expect(deleteWhereMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns 404 when deleting a missing task", async () => {
+    findFirstMock.mockResolvedValue(null);
+
+    const response = await router.request("/tasks/12", {
+      method: "DELETE",
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(body).toEqual({ error: "Task not found" });
+    expect(deleteWhereMock).not.toHaveBeenCalled();
   });
 });
