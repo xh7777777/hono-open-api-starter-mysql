@@ -1,5 +1,5 @@
 {
-  "name": "create-hono-open-api-mysql",
+  "name": "hono-open-api-starter-mysql",
   "type": "module",
   "version": "1.0.0",
   "description": "A template project for building Hono APIs with OpenAPI and MySQL using Drizzle ORM.",
@@ -39,11 +39,5 @@
     "tsx": "^4.7.1",
     "typescript": "^5.8.3",
     "vitest": "^4.0.16"
-  },
-  "files": [
-    "template",
-    "bin",
-    "README.md",
-    "LICENSE"
-  ]
+  }
 }
