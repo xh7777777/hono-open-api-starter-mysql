@@ -3,10 +3,10 @@ import { tasks } from "@/db/schema.js";
 import { eq } from "drizzle-orm";
 import type {
   CreateRoute,
-  RemoveRoute,
   GetOneRoute,
   ListRoute,
   PatchRoute,
+  RemoveRoute,
 } from "./tasks.routes.js";
 import type { AppRouteHandler } from "@/lib/types.js";
 

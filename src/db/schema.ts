@@ -26,7 +26,7 @@ export const tasks = mysqlTable("tasks", {
 export const selectTasksSchema = createSelectSchema(tasks);
 
 export const insertTasksSchema = createInsertSchema(tasks, {
-    title: z.string().min(1, 'title must not be empty'),
+  title: z.string().min(1, 'title must not be empty'),
 })
   .required({
     title: true,

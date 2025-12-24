@@ -12,5 +12,6 @@ export default antfu({
     'style/quotes': 'off',
     'perfectionist/sort-imports': 'off',
     'style/comma-dangle': 'off',
+    'import/no-mutable-exports': 'off',
   }
 })

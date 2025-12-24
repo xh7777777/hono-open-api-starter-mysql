@@ -1,9 +1,9 @@
-import path from "path";
+import path from "node:path";
 
 export default {
-    resolve: {
-        alias: {
-            "@": path.resolve(__dirname, "./src"),
-        }
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
     }
+  }
 }

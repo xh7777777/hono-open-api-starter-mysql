@@ -11,7 +11,7 @@ export default function configureOpenAPI(app: AppOpenAPI) {
       description: "This is the API documentation for the application."
     },
   })
-  
+
   app.get("/reference", Scalar({
     url: "/doc",
     theme: "purple",

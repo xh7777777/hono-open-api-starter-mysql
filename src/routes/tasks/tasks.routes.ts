@@ -70,7 +70,6 @@ export const remove = createRoute({
   },
 })
 
-
 export type ListRoute = typeof list;
 
 export type CreateRoute = typeof create;
